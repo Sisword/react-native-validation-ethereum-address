@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, TouchableOpacity, View, TextInput, Text} from 'react-native';
+import {StyleSheet, TouchableOpacity, View, TextInput, Text, Alert} from 'react-native';
 import {height, width} from 'react-native-dimension'
 import {connect} from 'react-redux'
 import {bindActionCreators} from 'redux'
@@ -7,17 +7,32 @@ import * as validationActions from './redux/actions/validationActions'
 import EthereumAddressCheck from 'ethereum-address'
 
 class CheckScreen extends React.Component {
+    state = {
+        validText: ''
+    };
 
     _onText = (value) => {
         this.props.validationActions.walletValue(value);
 
     };
+
     isAddress = (value) => {
         if (EthereumAddressCheck.isAddress(value)) {
-            console.log('Valid ethereum address.');
+            this.setState({validText: ''}, () => {
+                Alert.alert(
+                    'Error',
+                    value + '\nValid ethereum address.',
+                    [
+                        {text: 'OK'},
+                    ],
+                    {cancelable: false}
+                )
+
+
+            });
         }
         else {
-            console.log('Invalid Ethereum address.');
+            this.setState({validText: 'Invalid wallet address'});
         }
     };
 
@@ -25,6 +40,7 @@ class CheckScreen extends React.Component {
         return (
             <View style={styles.container}>
                 <View style={styles.inputView}>
+                    <Text style={{color:'red'}}>{this.state.validText}</Text>
                     <TextInput style={styles.input}
                                onChangeText={this._onText}
                                underlineColorAndroid={'transparent'}
@@ -51,6 +67,7 @@ const mapDispatchToProps = dispatch => ({
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(CheckScreen);
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
